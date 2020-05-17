@@ -60,7 +60,7 @@
       .header {
         flex-basis: 100%;
         text-align: center;
-        text-decoration: underline;
+        text-decoration: none;
       }
 
       .subtitle {
@@ -103,7 +103,7 @@
         ];
         return <div class="backdrop">
           <div class="container">
-            <h1 class="header">Statuses</h1>
+            <h1 class="header">Status</h1>
             <div class="subtitle">Below are links to service monitors</div>
             {pages.map(page =>
               <ClickableTile url={page.url} name={page.name} />

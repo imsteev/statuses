@@ -1,2 +1,2 @@
 # statuses
-single place to check out statuses of external services
+https://status-for-statuses.herokuapp.com/

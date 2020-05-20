@@ -48,16 +48,19 @@
       }
 
       .item:hover {
-        background-color: white;
-        -webkit-box-shadow: 9px 9px 17px -8px rgba(0,0,0,0.61);
-        -moz-box-shadow: 9px 9px 17px -8px rgba(0,0,0,0.61);
-        box-shadow: 9px 9px 17px -8px rgba(0,0,0,0.61);
         transition: all 0.6s;
       }
 
       .item:active {
         box-shadow: none;
         transition: all 0.2s;
+      }
+
+      .selected {
+        background-color: white;
+        -webkit-box-shadow: 9px 9px 17px -8px rgba(0,0,0,0.61);
+        -moz-box-shadow: 9px 9px 17px -8px rgba(0,0,0,0.61);
+        box-shadow: 9px 9px 17px -8px rgba(0,0,0,0.61);
       }
 
       .header {
@@ -104,6 +107,21 @@
         border: solid 2px #2B363C;
       }
 
+
+      iframe {
+        position: fixed;
+        border: solid 1px grey;
+        top: 10rem;
+        left: 8rem;
+        height: 75vh;
+        width: 400px;
+      }
+
+      iframe.inactive {
+        display: none;
+
+      }
+
     </style>
   </head>
 
@@ -113,7 +131,9 @@
     <script type="text/babel">
       const FilterTypes = {
         UNKNOWN: 0,
-        CI: 1
+        CI: 1,
+        FINANCIAL: 2,
+
       }
       const pages = [
         {
@@ -145,13 +165,18 @@
           url: 'https://status.circleci.com/',
           name: 'CircleCI',
           type: FilterTypes.CI
-        }
+        },
+        {
+          url: 'https://status.robinhood.com/',
+          name: 'Robinhood',
+          type: FilterTypes.FINANCIAL
+        },
       ];
 
-      const ClickableTile = ({ name, url }) => {
-        return <a className="item" target="_blank" href={url}>
+      const ClickableTile = ({ name, url, onClick, isSelected }) => {
+        return <div className={`item ${isSelected ? 'selected' : ''}`} href={url} onClick={onClick}>
           <p>{name}</p>
-        </a>
+        </div>
       }
 
       const Button = ({ text, onClick, children, isActive }) => {
@@ -161,6 +186,7 @@
       const App = () => {
         const [currentPages, setCurrentPages] = React.useState(pages);
         const [currentFilter, setCurrentFilter] = React.useState(FilterTypes.UNKNOWN);
+        const [currentPageUrl, setCurrentPage] = React.useState(null);
 
         React.useEffect(() => {
           switch (currentFilter) {
@@ -173,21 +199,33 @@
           }
         }, [currentFilter]);
 
-        currentPages.sort((a,b) => a.name < b.name ? -1 : (a.name === b.name ? 0 : 1));
+        React.useEffect(() => {
 
+        }, [currentPageUrl])
+
+        currentPages.sort((a,b) => a.name < b.name ? -1 : (a.name === b.name ? 0 : 1));
+        console.log(currentPageUrl)
         return <div className="backdrop">
           <div className="side-bar">
             <Button onClick={() => setCurrentFilter(FilterTypes.UNKNOWN)} isActive={currentFilter === FilterTypes.UNKNOWN}>All</Button>
             <Button onClick={() => setCurrentFilter(FilterTypes.CI)} isActive={currentFilter === FilterTypes.CI}>Continuous Integration</Button>
           </div>
           <div>
-            <div className="container">
+            <iframe src={currentPageUrl} className={currentPageUrl === null ? 'inactive' : ''}/>
+          </div>
+          <div>
+            <div className="container" style={{ marginLeft: '26rem'}}>
               <h1 className="header">Status</h1>
               <div className="subtitle">Below are links to service monitors</div>
               <div>
                 </div>
               {currentPages.sort((a,b) => a.name <= b.name).map(page =>
-                <ClickableTile key={page.name} url={page.url} name={page.name} />
+                <ClickableTile
+                  key={page.name}
+                  url="#"
+                  name={page.name}
+                  isSelected={currentPageUrl === page.url}
+                  onClick={() => currentPageUrl != page.url ? setCurrentPage(page.url) : setCurrentPage(null)} />
               )}
             </div>
           </div>

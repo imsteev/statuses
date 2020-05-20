@@ -5,12 +5,16 @@
 
     <title>Statuses</title>
 
-    <script src="https://unpkg.com/react@^16/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@16.13.0/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/react@16.13.1/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@16.13.1/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/babel-standalone@6.26.0/babel.js"></script>
-
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@300&family=Glegoo&display=swap');
+    </style>
     <style type="text/css">
       html {
+        font-family: 'Chakra Petch', sans-serif;
+        font-family: 'Glegoo', serif;
         background-color: rgb(235, 233, 233);
       }
 
@@ -36,16 +40,15 @@
         text-align: center;
         padding: 1.5rem;
         margin: 1rem;
-        border-radius: 10px;
         transition: all 0.4s;
         text-decoration: none;
         color: black;
         font-size: 2rem;
-        border: rgb(163, 174, 218) solid 1px;
+        border: #2B363C solid 1px;
       }
 
       .item:hover {
-        background-color: #08f0b6;
+        background-color: white;
         -webkit-box-shadow: 9px 9px 17px -8px rgba(0,0,0,0.61);
         -moz-box-shadow: 9px 9px 17px -8px rgba(0,0,0,0.61);
         box-shadow: 9px 9px 17px -8px rgba(0,0,0,0.61);
@@ -70,8 +73,35 @@
       }
 
       .side-bar {
-        padding: 4rem;
-        border: rgb(143, 151, 182) solid 1px;
+        position: fixed;
+        top: 2rem;
+        left: 4rem;
+
+      }
+
+      .button {
+        font-family: 'Chakra Petch', sans-serif;
+        font-family: 'Glegoo', serif;
+        font-size: 1rem;
+        cursor: pointer;
+        color: black;
+        padding: 1rem;
+        border: none;
+        border-radius: 1rem;
+        background-color: transparent;
+      }
+
+      .button:not(:first-of-type){
+        margin-left: 1rem;
+        margin-right: 2rem;
+      }
+
+      .button:focus {
+        outline: none;
+      }
+
+      .active-filter-true {
+        border: solid 2px #2B363C;
       }
 
     </style>
@@ -81,65 +111,85 @@
     <div id="root"></div>
 
     <script type="text/babel">
+      const FilterTypes = {
+        UNKNOWN: 0,
+        CI: 1
+      }
       const pages = [
         {
           url: 'https://githubstatus.com',
           name: 'Github',
+          type: FilterTypes.UNKNOWN
         },
         {
           url: 'https://www.traviscistatus.com/',
           name: 'Travis CI',
+          type: FilterTypes.CI
         },
         {
           url: 'https://status.dropbox.com/',
           name: 'Dropbox',
+          type: FilterTypes.UNKNOWN
         },
         {
           url: 'https://status.heroku.com/',
           name: 'Heroku',
+          type: FilterTypes.UNKNOWN
         },
         {
           url: 'https://status.gitlab.com/',
-          name: 'GitLab'
+          name: 'GitLab',
+          type: FilterTypes.UNKNOWN
         },
         {
           url: 'https://status.circleci.com/',
-          name: 'CircleCI'
+          name: 'CircleCI',
+          type: FilterTypes.CI
         }
       ];
 
       const ClickableTile = ({ name, url }) => {
-        return <a class="item" target="_blank" href={url}>
+        return <a className="item" target="_blank" href={url}>
           <p>{name}</p>
         </a>
       }
 
+      const Button = ({ text, onClick, children, isActive }) => {
+        return <button className={`button active-filter-${isActive}`} onClick={onClick}>{children}</button>
+      }
+
       const App = () => {
         const [currentPages, setCurrentPages] = React.useState(pages);
-        const [currentFilter, setCurrentFilter] = React.useState('');
+        const [currentFilter, setCurrentFilter] = React.useState(FilterTypes.UNKNOWN);
 
         React.useEffect(() => {
-          console.log('efect')
           switch (currentFilter) {
-            case 'ci':
-              setCurrentPages(
-                [pages[1], pages[5]]
-              )
-              console.log('wat')
+            case FilterTypes.CI:
+              setCurrentPages(pages.filter(p => p.type === currentFilter));
               break;
             default:
               setCurrentPages(pages);
-              break;
+              break
           }
-        }, [currentFilter])
+        }, [currentFilter]);
 
-        return <div class="backdrop">
-          <div class="container">
-            <h1 class="header">Status</h1>
-            <div class="subtitle">Below are links to service monitors</div>
-            {pages.map(page =>
-              <ClickableTile url={page.url} name={page.name} />
-            )}
+        currentPages.sort((a,b) => a.name < b.name ? -1 : (a.name === b.name ? 0 : 1));
+
+        return <div className="backdrop">
+          <div className="side-bar">
+            <Button onClick={() => setCurrentFilter(FilterTypes.UNKNOWN)} isActive={currentFilter === FilterTypes.UNKNOWN}>All</Button>
+            <Button onClick={() => setCurrentFilter(FilterTypes.CI)} isActive={currentFilter === FilterTypes.CI}>Continuous Integration</Button>
+          </div>
+          <div>
+            <div className="container">
+              <h1 className="header">Status</h1>
+              <div className="subtitle">Below are links to service monitors</div>
+              <div>
+                </div>
+              {currentPages.sort((a,b) => a.name <= b.name).map(page =>
+                <ClickableTile key={page.name} url={page.url} name={page.name} />
+              )}
+            </div>
           </div>
         </div>
       }
